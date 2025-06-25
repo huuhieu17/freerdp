@@ -3,11 +3,11 @@ setlocal
 
 set PASSWORD=nk0ckhun9
 
-echo [1/3] Downloading AnyDesk...
-powershell -Command "Invoke-WebRequest -Uri 'https://download.anydesk.com/AnyDesk.exe' -OutFile '%TEMP%\AnyDesk.exe'"
+echo [1/3] Downloading AnyDesk MSI...
+powershell -Command "Invoke-WebRequest -Uri 'https://download.anydesk.com/AnyDesk.msi' -OutFile '%TEMP%\AnyDesk.msi'"
 
 echo [2/3] Installing AnyDesk silently...
-"%TEMP%\AnyDesk.exe" /install /silent
+msiexec /i "%TEMP%\AnyDesk.msi" /quiet
 
 registry ===
 timeout /t 5 > nul
