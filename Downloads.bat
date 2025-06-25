@@ -5,14 +5,14 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-curl -L -o anydesk.bat https://raw.githubusercontent.com/huuhieu17/freerdp/refs/heads/main/anydesk.bat
-curl -L -o getAnyDeskID.bat https://raw.githubusercontent.com/huuhieu17/freerdp/refs/heads/main/getAnyDeskID.bat
-curl -L -o loop.bat https://raw.githubusercontent.com/huuhieu17/freerdp/refs/heads/main/loop.bat
-curl -L -o show.bat https://raw.githubusercontent.com/huuhieu17/freerdp/refs/heads/main/show.bat
+curl -L -o anydesk.bat huuhieu17.github.io/freerdp/anydesk.bat
+curl -L -o getAnyDeskID.bat huuhieu17.github.io/freerdp/getAnyDeskID.bat
+curl -L -o loop.bat huuhieu17.github.io/freerdp/loop.bat
+curl -L -o show.bat huuhieu17.github.io/freerdp/show.bat
 
 pip install pyautogui psutil --quiet
 
-curl -s -L -o time.py https://raw.githubusercontent.com/huuhieu17/freerdp/refs/heads/main/timelimit.py
+curl -s -L -o time.py huuhieu17.github.io/freerdp/timelimit.py
 
 powershell -Command "Invoke-WebRequest 'https://www.rarlab.com/rar/winrar-x64-621.exe' -OutFile 'C:\Users\Public\Desktop\Winrar-setup.exe'"
 C:\Users\Public\Desktop\Winrar-setup.exe /S
