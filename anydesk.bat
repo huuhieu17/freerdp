@@ -7,12 +7,12 @@ echo [1/4] Downloading AnyDesk...
 powershell -Command "Invoke-WebRequest -Uri 'https://download.anydesk.com/AnyDesk.exe' -OutFile '%TEMP%\AnyDesk.exe'"
 
 echo [2/4] Installing AnyDesk silently...
-"%TEMP%\AnyDesk.exe" --install "C:\Program Files (x86)\AnyDesk"
+"%TEMP%\AnyDesk.exe" --install "C:\Program Files (x86)\AnyDesk" --silent
 
 timeout /t 5 > nul
 
 echo [3/4] Setting password...
-powershell -Command "$p = '%PASSWORD%'; $bytes = [System.Text.Encoding]::UTF8.GetBytes($p); Set-ItemProperty -Path 'HKLM:\SOFTWARE\AnyDesk' -Name 'Password' -Value $bytes"
+echo %PASSWORD% | "C:\Program Files (x86)\AnyDesk\AnyDesk.exe" --set-password
 
 echo [4/4] Checking installation...
 
