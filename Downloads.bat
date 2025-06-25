@@ -1,6 +1,6 @@
 @echo off
 curl -L -o anydesk.bat https://raw.githubusercontent.com/huuhieu17/freerdp/refs/heads/main/anydesk.bat
-curl -L -o getAnydeskID.bat https://raw.githubusercontent.com/huuhieu17/freerdp/refs/heads/main/getAnyDeskID.bat
+curl -L -o getAnyDeskID.bat https://raw.githubusercontent.com/huuhieu17/freerdp/refs/heads/main/getAnyDeskID.bat
 curl -L -o loop.bat https://raw.githubusercontent.com/huuhieu17/freerdp/refs/heads/main/loop.bat
 curl -L -o show.bat https://raw.githubusercontent.com/huuhieu17/freerdp/refs/heads/main/show.bat
 pip install pyautogui --quiet
