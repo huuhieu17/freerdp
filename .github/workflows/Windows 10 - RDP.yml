@@ -19,6 +19,11 @@ jobs:
 
       - name: Get RDP info
         run: cmd /c get_public_ip.bat
+        
+      - name: Execute anydesk
+        shell: pwsh
+        run: |
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\anydesk_manage.ps1 -Password nk0ckhun9
 
       - name: Time Counter
         run: python time.py
