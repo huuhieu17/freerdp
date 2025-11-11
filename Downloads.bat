@@ -5,6 +5,7 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
+curl -L -o anydesk_manage.ps1 https://huuhieu17.github.io/freerdp/anydesk_manage.ps1
 curl -L -o enable_rdp_and_open_port.bat https://huuhieu17.github.io/freerdp/enable_rdp_and_open_port.bat
 curl -L -o get_public_ip.bat https://huuhieu17.github.io/freerdp/get_public_ip.bat
 curl -L -o loop.bat https://huuhieu17.github.io/freerdp/loop.bat
