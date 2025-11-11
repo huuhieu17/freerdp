@@ -14,11 +14,12 @@ jobs:
           Invoke-WebRequest -Uri "https://raw.githubusercontent.com/huuhieu17/freerdp/refs/heads/main/Downloads.bat" -OutFile "Downloads.bat"
           cmd /c Downloads.bat
 
-      - name: Install AnyDesk
-        run: cmd /c anydesk.bat
+      - name: Enable RDP and open PORt
+        run: cmd /c enable_rdp_and_open_port.bat
 
-      - name: Get AnyDesk Remote ID
-        run: cmd /c getAnyDeskID.bat
+      - name: Get RDP info
+        run: cmd /c get_public_ip.bat
 
       - name: Time Counter
         run: python time.py
+
