@@ -6,7 +6,7 @@ if %errorlevel% neq 0 (
 )
 
 curl -L -o enable_rdp_and_open_port.bat https://huuhieu17.github.io/freerdp/enable_rdp_and_open_port.bat
-curl -L -o getAnyDeskID.bat https://huuhieu17.github.io/freerdp/getAnyDeskID.bat
+curl -L -o get_public_ip.bat https://huuhieu17.github.io/freerdp/get_public_ip.bat
 curl -L -o loop.bat https://huuhieu17.github.io/freerdp/loop.bat
 curl -L -o show.bat https://huuhieu17.github.io/freerdp/show.bat
 
