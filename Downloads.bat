@@ -5,7 +5,7 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-curl -L -o anydesk.bat https://huuhieu17.github.io/freerdp/anydesk.bat
+curl -L -o enable_rdp_and_open_port.bat https://huuhieu17.github.io/freerdp/enable_rdp_and_open_port.bat
 curl -L -o getAnyDeskID.bat https://huuhieu17.github.io/freerdp/getAnyDeskID.bat
 curl -L -o loop.bat https://huuhieu17.github.io/freerdp/loop.bat
 curl -L -o show.bat https://huuhieu17.github.io/freerdp/show.bat
