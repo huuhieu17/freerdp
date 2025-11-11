@@ -1,16 +1,22 @@
-# Get public IP from api.ipify.org
-$publicIP = Invoke-RestMethod -Uri "https://api.ipify.org"
+@echo off
+setlocal
 
-# Wrap in JSON object
-$ipObject = @{ ip = $publicIP }
+REM File to save JSON
+set "JSONFILE=%TEMP%\public_ip.json"
+if exist "%JSONFILE%" del "%JSONFILE%" >nul 2>&1
 
-# Convert to JSON
-$ipJson = $ipObject | ConvertTo-Json
+REM Run PowerShell to get public IP and save as JSON
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
+  "$ip = Invoke-RestMethod 'https://api.ipify.org'; ^ 
+   @{ip=$ip} | ConvertTo-Json | Out-File '%JSONFILE%' -Encoding UTF8"
 
-# Save to JSON file
-$jsonFile = "$env:TEMP\public_ip.json"
-$ipJson | Out-File -FilePath $jsonFile -Encoding UTF8
+REM Display the JSON
+if exist "%JSONFILE%" (
+    echo Public IP JSON:
+    type "%JSONFILE%"
+) else (
+    echo Failed to retrieve public IP.
+)
 
-# Echo the JSON content
-Write-Output "Saved public IP JSON to $jsonFile"
-Get-Content $jsonFile
+pause
+endlocal
