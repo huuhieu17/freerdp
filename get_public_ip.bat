@@ -6,9 +6,9 @@ echo Retrieving public IP address...
 set "TMPFILE=%TEMP%\public_ip.txt"
 if exist "%TMPFILE%" del "%TMPFILE%" >nul 2>&1
 
-REM Dùng PowerShell lấy IP và ghi file dưới dạng ASCII
+REM Use Invoke-WebRequest and redirect output to ASCII file
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
-  "$ip = (Invoke-RestMethod 'https://api.ipify.org'); Set-Content -Path '%TMPFILE%' -Value $ip -Encoding ASCII" 2>nul
+  "(Invoke-WebRequest https://api.ipify.org -UseBasicParsing).Content | Out-File -FilePath '%TMPFILE%' -Encoding ascii" 2>nul
 
 set "PUBLIC_IP="
 if exist "%TMPFILE%" (
@@ -26,7 +26,7 @@ if defined PUBLIC_IP (
     echo.
     echo Could not determine public IP.
     echo Try running in PowerShell:
-    echo   Invoke-RestMethod -Uri 'https://api.ipify.org'
+    echo   (Invoke-WebRequest https://api.ipify.org -UseBasicParsing).Content
 )
 
 pause
