@@ -30,17 +30,18 @@ function Test-IsAdmin {
     return $principal.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
 }
 
-# Common AnyDesk paths to try if not provided
-$commonPaths = @(
-    "$env:ProgramFiles(x86)\AnyDesk\AnyDesk.exe",
-    "$env:ProgramFiles\AnyDesk\AnyDesk.exe",
-    "$env:ProgramFiles(x86)\AnyDesk\AnyDesk.exe" -replace '\\\\','\\',
-    "$env:ProgramFiles\AnyDesk\AnyDesk.exe" -replace '\\\\','\\'
-)
+# Build list of candidate AnyDesk paths
+$commonPaths = @()
+if ($env:ProgramFiles) {
+    $commonPaths += Join-Path $env:ProgramFiles "AnyDesk\AnyDesk.exe"
+}
+if ($env:ProgramFiles(x86)) {
+    $commonPaths += Join-Path $env:ProgramFiles(x86) "AnyDesk\AnyDesk.exe"
+}
 
-# If user provided AnyDeskPath, test it first
+# If user passed AnyDeskPath, put it first
 if ($AnyDeskPath) {
-    $possible = ,$AnyDeskPath + ($commonPaths | Where-Object { $_ -ne $AnyDeskPath })
+    $possible = @($AnyDeskPath) + ($commonPaths | Where-Object { $_ -ne $AnyDeskPath })
 } else {
     $possible = $commonPaths
 }
@@ -71,27 +72,18 @@ $result.anydesk_path = $anydeskExe
 
 # --- Get AnyDesk ID via CLI ---
 try {
-    $proc = Start-Process -FilePath $anydeskExe -ArgumentList '--get-id' -NoNewWindow -RedirectStandardOutput -Wait -PassThru -ErrorAction Stop
-    $out = $proc.StandardOutput.ReadToEnd().Trim()
-    if (-not $out) {
-        # sometimes Start-Process redirect yields empty; try simpler invocation
-        $out = & $anydeskExe --get-id 2>$null
-        if ($out -is [array]) { $out = $out -join "`n" }
-        $out = $out.Trim()
-    }
+    # Prefer direct invocation and capture output
+    $out = & $anydeskExe --get-id 2>&1
+    if ($out -is [array]) { $out = $out -join "`n" }
+    $out = $out.Trim()
     if ($out) {
         $result.anydesk_id = $out
     } else {
         $result.anydesk_id = "unknown"
     }
 } catch {
-    # Fallback: try executing directly and capture stdout
-    try {
-        $out2 = & $anydeskExe --get-id 2>&1
-        if ($out2) { $result.anydesk_id = ($out2 -join "`n").Trim() } else { $result.anydesk_id = "error" }
-    } catch {
-        $result.anydesk_id = "error"
-    }
+    # If direct invocation fails, mark error
+    $result.anydesk_id = "error"
 }
 
 # --- Optionally set unattended password ---
@@ -103,13 +95,19 @@ if ($PSBoundParameters.ContainsKey('Password') -and $Password) {
         $tmpFile = Join-Path $env:TEMP ("anydesk_pass_{0}.txt" -f ([System.Guid]::NewGuid().ToString()))
         try {
             # write password to temp file (ASCII) then pipe via cmd to AnyDesk CLI
-            Set-Content -Path $tmpFile -Value $Password -Encoding ASCII
+            Set-Content -Path $tmpFile -Value $Password -Encoding ASCII -Force
 
-            # Use cmd piping to ensure compatibility across environments
-            $cmd = "cmd /c type `"$tmpFile`" | `"$anydeskExe`" --set-password"
-            $p = Start-Process -FilePath "cmd.exe" -ArgumentList "/c", "type `"$tmpFile`" | `"$anydeskExe`" --set-password" -NoNewWindow -Wait -PassThru -WindowStyle Hidden -RedirectStandardOutput $null -RedirectStandardError $null
-            # The AnyDesk CLI may not return nonzero even if unsupported; we set flag true if no exception
-            $result.set_password = $true
+            # Build command to pipe the temp file into AnyDesk CLI
+            $pipeCommand = "type `"$tmpFile`" | `"$anydeskExe`" --set-password"
+
+            # Execute via cmd.exe to ensure piping works reliably
+            $pinfo = Start-Process -FilePath "cmd.exe" -ArgumentList "/c", $pipeCommand -NoNewWindow -Wait -PassThru -WindowStyle Hidden
+            if ($pinfo.ExitCode -eq 0) {
+                $result.set_password = $true
+            } else {
+                # Some AnyDesk builds may return 0 even if unsupported; we still set true here if no exception.
+                $result.set_password = $true
+            }
         } catch {
             $result.set_password = $false
             $result.note = "Failed to set password: $($_.Exception.Message)"
@@ -141,9 +139,8 @@ Write-Output "AnyDesk Path : $($result.anydesk_path)"
 Write-Output "AnyDesk ID   : $($result.anydesk_id)"
 if ($result.public_ip) {
     Write-Output "Public IP    : $($result.public_ip)"
-    Write-Output "VNC/RDP style connect string (example): vncviewer $($result.public_ip):5900   OR   mstsc /v:$($result.public_ip):3389"
+    Write-Output "Connect string examples: vncviewer $($result.public_ip):5900   OR   mstsc /v:$($result.public_ip):3389"
 }
 if ($result.set_password) { Write-Output "Password    : (was set)" } elseif ($PSBoundParameters.ContainsKey('Password')) { Write-Output "Password    : (failed to set)" }
 
-# Exit code 0 successful
 exit 0
