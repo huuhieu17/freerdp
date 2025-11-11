@@ -1,33 +1,16 @@
-@echo off
-setlocal
+# Get public IP from api.ipify.org
+$publicIP = Invoke-RestMethod -Uri "https://api.ipify.org"
 
-echo Retrieving public IP address...
+# Wrap in JSON object
+$ipObject = @{ ip = $publicIP }
 
-set "TMPFILE=%TEMP%\public_ip.txt"
-if exist "%TMPFILE%" del "%TMPFILE%" >nul 2>&1
+# Convert to JSON
+$ipJson = $ipObject | ConvertTo-Json
 
-REM Use Invoke-WebRequest and redirect output to ASCII file
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
-  "(Invoke-WebRequest https://api.ipify.org -UseBasicParsing).Content | Out-File -FilePath '%TMPFILE%' -Encoding ascii" 2>nul
+# Save to JSON file
+$jsonFile = "$env:TEMP\public_ip.json"
+$ipJson | Out-File -FilePath $jsonFile -Encoding UTF8
 
-set "PUBLIC_IP="
-if exist "%TMPFILE%" (
-    set /p PUBLIC_IP=<"%TMPFILE%"
-    del "%TMPFILE%" >nul 2>&1
-)
-
-if defined PUBLIC_IP (
-    echo.
-    echo Public IP: %PUBLIC_IP%
-    echo.
-    echo Example RDP connect string:
-    echo   mstsc /v:%PUBLIC_IP%:3389
-) else (
-    echo.
-    echo Could not determine public IP.
-    echo Try running in PowerShell:
-    echo   (Invoke-WebRequest https://api.ipify.org -UseBasicParsing).Content
-)
-
-pause
-endlocal
+# Echo the JSON content
+Write-Output "Saved public IP JSON to $jsonFile"
+Get-Content $jsonFile
