@@ -35,8 +35,8 @@ $commonPaths = @()
 if ($env:ProgramFiles) {
     $commonPaths += Join-Path $env:ProgramFiles "AnyDesk\AnyDesk.exe"
 }
-if ($env:ProgramFiles(x86)) {
-    $commonPaths += Join-Path $env:ProgramFiles(x86) "AnyDesk\AnyDesk.exe"
+if ($env:"ProgramFiles(x86)") {
+    $commonPaths += Join-Path $env:"ProgramFiles(x86)" "AnyDesk\AnyDesk.exe"
 }
 
 # If user passed AnyDeskPath, put it first
@@ -72,7 +72,6 @@ $result.anydesk_path = $anydeskExe
 
 # --- Get AnyDesk ID via CLI ---
 try {
-    # Prefer direct invocation and capture output
     $out = & $anydeskExe --get-id 2>&1
     if ($out -is [array]) { $out = $out -join "`n" }
     $out = $out.Trim()
@@ -82,7 +81,6 @@ try {
         $result.anydesk_id = "unknown"
     }
 } catch {
-    # If direct invocation fails, mark error
     $result.anydesk_id = "error"
 }
 
@@ -94,20 +92,10 @@ if ($PSBoundParameters.ContainsKey('Password') -and $Password) {
     } else {
         $tmpFile = Join-Path $env:TEMP ("anydesk_pass_{0}.txt" -f ([System.Guid]::NewGuid().ToString()))
         try {
-            # write password to temp file (ASCII) then pipe via cmd to AnyDesk CLI
             Set-Content -Path $tmpFile -Value $Password -Encoding ASCII -Force
-
-            # Build command to pipe the temp file into AnyDesk CLI
             $pipeCommand = "type `"$tmpFile`" | `"$anydeskExe`" --set-password"
-
-            # Execute via cmd.exe to ensure piping works reliably
-            $pinfo = Start-Process -FilePath "cmd.exe" -ArgumentList "/c", $pipeCommand -NoNewWindow -Wait -PassThru -WindowStyle Hidden
-            if ($pinfo.ExitCode -eq 0) {
-                $result.set_password = $true
-            } else {
-                # Some AnyDesk builds may return 0 even if unsupported; we still set true here if no exception.
-                $result.set_password = $true
-            }
+            Start-Process -FilePath "cmd.exe" -ArgumentList "/c", $pipeCommand -NoNewWindow -Wait -PassThru -WindowStyle Hidden | Out-Null
+            $result.set_password = $true
         } catch {
             $result.set_password = $false
             $result.note = "Failed to set password: $($_.Exception.Message)"
@@ -122,7 +110,6 @@ try {
     $ip = Invoke-WebRequest -Uri 'https://api.ipify.org' -UseBasicParsing -TimeoutSec $PublicIpTimeoutSec
     $result.public_ip = $ip.Content.Trim()
 } catch {
-    # try alternate service
     try {
         $ip2 = Invoke-WebRequest -Uri 'https://ifconfig.me/ip' -UseBasicParsing -TimeoutSec $PublicIpTimeoutSec
         $result.public_ip = $ip2.Content.Trim()
@@ -131,7 +118,7 @@ try {
     }
 }
 
-# Output JSON and also write a human-friendly echo
+# Output JSON and also human-readable info
 $json = $result | ConvertTo-Json -Depth 4
 Write-Output $json
 Write-Output ""
